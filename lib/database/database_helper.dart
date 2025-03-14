@@ -73,4 +73,17 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  // 특정 날짜 범위의 일기를 불러오는 메소드
+  Future<List<Map<String, dynamic>>> getDiariesByDateRange(DateTime start, DateTime end) async {
+    final db = await instance.database;
+    final startStr = start.toIso8601String();
+    final endStr = end.toIso8601String();
+    
+    return await db.query(
+      table,
+      where: '$columnCreatedAt BETWEEN ? AND ?',
+      whereArgs: [startStr, endStr],
+    );
+  }
 } 
