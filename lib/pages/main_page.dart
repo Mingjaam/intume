@@ -164,10 +164,12 @@ class _MainPageState extends State<MainPage> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              diary.title,
+                                              diary.content.split('\n').first,
                                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                                 fontWeight: FontWeight.bold,
                                               ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                             SizedBox(height: 8),
                                             Text(

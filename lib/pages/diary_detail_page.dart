@@ -63,22 +63,30 @@ class _DiaryDetailPageState extends State<DiaryDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 제목
-            Text(
-              _currentDiary.title,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            // 작성 날짜
-            Text(
-              _formatDate(_currentDiary.createdAt),
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+            // 태그와 날짜를 함께 표시하는 Row
+            Row(
+              children: [
+                // 태그를 Chip으로 표시
+                Chip(
+                  label: Text(
+                    _currentDiary.tag,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                  backgroundColor: Colors.blue,
+                ),
+                const SizedBox(width: 8),
+                // 작성 날짜
+                Text(
+                  _formatDate(_currentDiary.createdAt),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             // 일기 내용

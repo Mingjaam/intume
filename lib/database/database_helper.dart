@@ -3,13 +3,13 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _databaseName = "diary.db";
-  static const _databaseVersion = 1;
+  static const _databaseVersion = 2;
 
   static const table = 'diaries';
 
   static const columnId = 'id';
-  static const columnTitle = 'title';
   static const columnContent = 'content';
+  static const columnTag = 'tag';
   static const columnCreatedAt = 'created_at';
 
   // 싱글톤 패턴 구현
@@ -29,6 +29,7 @@ class DatabaseHelper {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -36,11 +37,27 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE $table (
         $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
-        $columnTitle TEXT NOT NULL,
         $columnContent TEXT NOT NULL,
+        $columnTag TEXT NOT NULL,
         $columnCreatedAt TEXT NOT NULL
       )
     ''');
+  }
+
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE $table RENAME TO ${table}_old');
+      
+      await _onCreate(db, newVersion);
+      
+      await db.execute('''
+        INSERT INTO $table ($columnId, $columnContent, $columnTag, $columnCreatedAt)
+        SELECT id, content, 'MY', created_at
+        FROM ${table}_old
+      ''');
+      
+      await db.execute('DROP TABLE ${table}_old');
+    }
   }
 
   // CRUD 작업을 위한 메서드들

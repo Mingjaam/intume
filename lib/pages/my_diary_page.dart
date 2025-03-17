@@ -91,25 +91,46 @@ class _MyDiaryPageState extends State<MyDiaryPage> {
                           return Card(
                             margin: const EdgeInsets.only(bottom: 16),
                             child: ListTile(
-                              title: Text(
-                                diary.title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
+                              title: Row(
+                                children: [
+                                  // 내용의 첫 줄을 제목처럼 표시
+                                  Expanded(
+                                    child: Text(
+                                      diary.content.split('\n').first, // 첫 줄만 가져오기
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  // 태그를 Chip으로 표시
+                                  Chip(
+                                    label: Text(
+                                      diary.tag,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    backgroundColor: Colors.blue,
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ],
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const SizedBox(height: 8),
-                                  // 일기 내용 (최대 2줄까지 표시)
+                                  // 내용 표시 (첫 줄 제외)
                                   Text(
-                                    diary.content,
+                                    diary.content.split('\n').skip(1).join('\n'), // 첫 줄을 제외한 나머지 내용
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 8),
-                                  // 작성 날짜
                                   Text(
                                     _formatDate(diary.createdAt),
                                     style: TextStyle(
