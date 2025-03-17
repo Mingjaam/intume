@@ -70,6 +70,22 @@ class _MainPageState extends State<MainPage> {
     return _diaryEvents[normalizedDay] ?? [];
   }
 
+  // 태그에 따른 색상을 반환하는 메서드 추가
+  Color _getTagColor(String tag) {
+    switch (tag) {
+      case 'MY':
+        return AppTheme.tagMy;
+      case '운동일지':
+        return AppTheme.tagExercise;
+      case '영화일지':
+        return AppTheme.tagMovie;
+      case 'instagram':
+        return AppTheme.tagInstagram;
+      default:
+        return AppTheme.primaryYellow;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,14 +117,36 @@ class _MainPageState extends State<MainPage> {
                       _selectedDay = selectedDay;
                       _focusedDay = focusedDay;
                     });
-                    // 날짜가 변경되면 해당 날짜의 일기를 불러오기
                     _loadSelectedDayDiaries();
                   },
                   availableCalendarFormats: const {
                     CalendarFormat.month: '월간',
                   },
                   eventLoader: _getEventsForDay,
-                  calendarStyle: AppTheme.calendarStyle,
+                  calendarBuilders: CalendarBuilders(
+                    markerBuilder: (context, date, events) {
+                      if (events.isEmpty) return const SizedBox();
+                      
+                      return Positioned(
+                        bottom: 1,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: events.map((event) {
+                            final diary = event as Diary;
+                            return Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _getTagColor(diary.tag),
+                              ),
+                            );
+                          }).take(5).toList(),
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 Divider(thickness: 1),
                 SizedBox(height: 16),
@@ -158,25 +196,51 @@ class _MainPageState extends State<MainPage> {
                                       child: Container(
                                         width: double.infinity,
                                         margin: EdgeInsets.only(bottom: 12),
-                                        padding: EdgeInsets.all(16),
-                                        decoration: AppTheme.diaryBoxDecoration,
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.background,
+                                          border: Border.all(
+                                            color: _getTagColor(diary.tag),
+                                            width: 2.0,
+                                          ),
+                                          borderRadius: BorderRadius.circular(0),
+                                        ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              diary.content.split('\n').first,
-                                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                                fontWeight: FontWeight.bold,
+                                            Container(
+                                              height: 20,
+                                              alignment: Alignment.centerLeft,
+                                              padding: EdgeInsets.only(left: 10),
+                                              child: Transform.translate(
+                                                offset: Offset(0, -4),
+                                                child: Icon(
+                                                  Icons.bookmark,
+                                                  color: _getTagColor(diary.tag),
+                                                  size: 24,
+                                                ),
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            SizedBox(height: 8),
-                                            Text(
-                                              diary.content,
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: Theme.of(context).textTheme.bodyMedium,
+                                            Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    diary.content.split('\n').first,
+                                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                  SizedBox(height: 8),
+                                                  Text(
+                                                    diary.content,
+                                                    maxLines: 3,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: Theme.of(context).textTheme.bodyMedium,
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),

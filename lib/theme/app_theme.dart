@@ -8,6 +8,12 @@ class AppTheme {
   static const Color accentBlue = Color(0xFF00BFFF);    // 강조 하늘색
   static const Color lightPurple = Color(0xFFC9C3E6); // 연한보라색
   
+  //태그별 색상
+  static const Color tagMy =Color(0xFFFFD700);
+  static const Color tagExercise = Color.fromARGB(255, 29, 243, 236);
+  static const Color tagMovie = Color.fromARGB(255, 246, 88, 88);
+  static const Color tagInstagram = Color.fromARGB(255, 243, 109, 245);
+
   // 텍스트 색상
   static const Color textPrimary = Color(0xFF333333);   // 기본 텍스트
   static const Color textSecondary = Color(0xFF666666); // 보조 텍스트
