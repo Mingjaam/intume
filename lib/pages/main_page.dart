@@ -54,10 +54,7 @@ class _MainPageState extends State<MainPage> {
     final startDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
     final endDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day, 23, 59, 59);
     
-    print('찾는 기간: ${startDate.toIso8601String()} ~ ${endDate.toIso8601String()}');
-    
     final diaryMaps = await DatabaseHelper.instance.getDiariesByDateRange(startDate, endDate);
-    print('찾은 일기 수: ${diaryMaps.length}');
     
     setState(() {
       _selectedDiaries = diaryMaps.map((map) => Diary.fromMap(map)).toList();
@@ -68,22 +65,6 @@ class _MainPageState extends State<MainPage> {
   List<dynamic> _getEventsForDay(DateTime day) {
     final normalizedDay = DateTime(day.year, day.month, day.day);
     return _diaryEvents[normalizedDay] ?? [];
-  }
-
-  // 태그에 따른 색상을 반환하는 메서드 추가
-  Color _getTagColor(String tag) {
-    switch (tag) {
-      case 'MY':
-        return AppTheme.tagMy;
-      case '운동일지':
-        return AppTheme.tagExercise;
-      case '영화일지':
-        return AppTheme.tagMovie;
-      case 'instagram':
-        return AppTheme.tagInstagram;
-      default:
-        return AppTheme.primaryYellow;
-    }
   }
 
   @override
@@ -139,7 +120,7 @@ class _MainPageState extends State<MainPage> {
                               height: 8,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _getTagColor(diary.tag),
+                                color: AppTheme.getTagColor(diary.tag),
                               ),
                             );
                           }).take(5).toList(),
@@ -199,7 +180,7 @@ class _MainPageState extends State<MainPage> {
                                         decoration: BoxDecoration(
                                           color: AppTheme.background,
                                           border: Border.all(
-                                            color: _getTagColor(diary.tag),
+                                            color: AppTheme.getTagColor(diary.tag),
                                             width: 2.0,
                                           ),
                                           borderRadius: BorderRadius.circular(0),
@@ -214,7 +195,7 @@ class _MainPageState extends State<MainPage> {
                                                 offset: Offset(0, -4),
                                                 child: Icon(
                                                   Icons.bookmark,
-                                                  color: _getTagColor(diary.tag),
+                                                  color: AppTheme.getTagColor(diary.tag),
                                                   size: 24,
                                                 ),
                                               ),

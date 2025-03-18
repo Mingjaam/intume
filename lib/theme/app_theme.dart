@@ -124,4 +124,19 @@ class AppTheme {
       tertiary: accentBlue,
     ),
   );
+
+  static Color getTagColor(String tag) {
+    switch (tag) {
+      case 'MY':
+        return tagMy;
+      case '운동일지':
+        return tagExercise;
+      case '영화일지':
+        return tagMovie;
+      case 'instagram':
+        return tagInstagram;
+      default:
+        return primaryYellow;
+    }
+  }
 } 
