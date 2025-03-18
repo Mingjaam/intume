@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _databaseName = "diary.db";
-  static const _databaseVersion = 2;
+  static const _databaseVersion = 3;
 
   static const table = 'diaries';
 
@@ -11,6 +11,7 @@ class DatabaseHelper {
   static const columnContent = 'content';
   static const columnTag = 'tag';
   static const columnCreatedAt = 'created_at';
+  static const columnImagePaths = 'image_paths';
 
   // 싱글톤 패턴 구현
   DatabaseHelper._privateConstructor();
@@ -39,20 +40,21 @@ class DatabaseHelper {
         $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
         $columnContent TEXT NOT NULL,
         $columnTag TEXT NOT NULL,
-        $columnCreatedAt TEXT NOT NULL
+        $columnCreatedAt TEXT NOT NULL,
+        $columnImagePaths TEXT NOT NULL DEFAULT ''
       )
     ''');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
+    if (oldVersion < 3) {
       await db.execute('ALTER TABLE $table RENAME TO ${table}_old');
       
       await _onCreate(db, newVersion);
       
       await db.execute('''
-        INSERT INTO $table ($columnId, $columnContent, $columnTag, $columnCreatedAt)
-        SELECT id, content, 'MY', created_at
+        INSERT INTO $table ($columnId, $columnContent, $columnTag, $columnCreatedAt, $columnImagePaths)
+        SELECT id, content, tag, created_at, ''
         FROM ${table}_old
       ''');
       

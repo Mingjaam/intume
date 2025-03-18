@@ -7,6 +7,7 @@ import '../models/diary.dart';
 import '../pages/diary_detail_page.dart';
 import '../pages/add_diary_page.dart';
 import '../theme/app_theme.dart';
+import 'dart:io';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -213,13 +214,34 @@ class _MainPageState extends State<MainPage> {
                                                     maxLines: 1,
                                                     overflow: TextOverflow.ellipsis,
                                                   ),
-                                                  SizedBox(height: 8),
-                                                  Text(
-                                                    diary.content,
-                                                    maxLines: 3,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: Theme.of(context).textTheme.bodyMedium,
-                                                  ),
+                                                  if (diary.imagePaths.isNotEmpty && diary.imagePaths[0].isNotEmpty) ...[
+                                                    SizedBox(height: 8),
+                                                    Container(
+                                                      width: double.infinity,
+                                                      height: 150,
+                                                      child: ListView.builder(
+                                                        scrollDirection: Axis.horizontal,
+                                                        itemCount: diary.imagePaths.length,
+                                                        itemBuilder: (context, index) {
+                                                          if (diary.imagePaths[index].isEmpty) return SizedBox.shrink();
+                                                          return Container(
+                                                            width: MediaQuery.of(context).size.width - 32,
+                                                            margin: EdgeInsets.only(right: index != diary.imagePaths.length - 1 ? 8 : 0),
+                                                            child: ClipRRect(
+                                                              borderRadius: BorderRadius.circular(4),
+                                                              child: Image.file(
+                                                                File(diary.imagePaths[index]),
+                                                                fit: BoxFit.cover,
+                                                                errorBuilder: (context, error, stackTrace) {
+                                                                  return SizedBox.shrink();
+                                                                },
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ],
                                               ),
                                             ),

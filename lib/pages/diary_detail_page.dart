@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/diary.dart';
+import '../database/database_helper.dart';
 import '../pages/add_diary_page.dart';
+import '../theme/app_theme.dart';
+import 'dart:io';
 
 // 일기 상세 내용을 보여주는 페이지
-class DiaryDetailPage extends StatefulWidget {
+class DiaryDetailPage extends StatelessWidget {
   final Diary diary;
 
   const DiaryDetailPage({
@@ -12,92 +15,145 @@ class DiaryDetailPage extends StatefulWidget {
   });
 
   @override
-  State<DiaryDetailPage> createState() => _DiaryDetailPageState();
-}
-
-class _DiaryDetailPageState extends State<DiaryDetailPage> {
-  // 현재 표시할 일기 데이터
-  late Diary _currentDiary;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentDiary = widget.diary;
-  }
-
-  // 날짜를 'YYYY.MM.DD' 형식으로 포맷하는 메소드
-  String _formatDate(DateTime date) {
-    return '${date.year}.${date.month.toString().padLeft(2, '0')}.${date.day.toString().padLeft(2, '0')}';
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('일기 상세'),
         actions: [
-          // 수정 버튼
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () async {
-              // AddDiaryPage를 수정 모드로 열기
-              final updatedDiary = await Navigator.push<Diary>(
+            onPressed: () {
+              Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AddDiaryPage(diary: _currentDiary),
+                  builder: (context) => AddDiaryPage(diary: diary),
+                ),
+              ).then((value) {
+                if (value != null) {
+                  Navigator.pop(context, true);
+                }
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('일기 삭제'),
+                  content: Text('이 일기를 삭제하시겠습니까?'),
+                  actions: [
+                    TextButton(
+                      child: Text('취소'),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    TextButton(
+                      child: Text('삭제'),
+                      onPressed: () async {
+                        await DatabaseHelper.instance.delete(diary.id!);
+                        if (context.mounted) {
+                          Navigator.pop(context); // 다이얼로그 닫기
+                          Navigator.pop(context, true); // 상세 페이지 닫기
+                        }
+                      },
+                    ),
+                  ],
                 ),
               );
-              
-              // 수정된 데이터가 있으면 화면 갱신
-              if (updatedDiary != null) {
-                setState(() {
-                  _currentDiary = updatedDiary;
-                });
-              }
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 태그와 날짜를 함께 표시하는 Row
-            Row(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 태그를 Chip으로 표시
-                Chip(
-                  label: Text(
-                    _currentDiary.tag,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
+                // 태그 표시
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.getTagColor(diary.tag).withOpacity(0.1),
+                    border: Border.all(
+                      color: AppTheme.getTagColor(diary.tag),
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    diary.tag,
+                    style: TextStyle(
+                      color: AppTheme.getTagColor(diary.tag),
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  backgroundColor: Colors.blue,
                 ),
-                const SizedBox(width: 8),
-                // 작성 날짜
-                Text(
-                  _formatDate(_currentDiary.createdAt),
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
+                SizedBox(height: 16),
+                // 이미지가 있는 경우 이미지 표시
+                if (diary.imagePaths.isNotEmpty && diary.imagePaths[0].isNotEmpty) ...[
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,  // 한 줄에 2개의 이미지
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemCount: diary.imagePaths.length,
+                    itemBuilder: (context, index) {
+                      if (diary.imagePaths[index].isEmpty) return SizedBox.shrink();
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Scaffold(
+                                backgroundColor: Colors.black,
+                                appBar: AppBar(
+                                  backgroundColor: Colors.black,
+                                  iconTheme: IconThemeData(color: Colors.white),
+                                ),
+                                body: Center(
+                                  child: InteractiveViewer(
+                                    panEnabled: true,
+                                    boundaryMargin: EdgeInsets.all(20),
+                                    minScale: 0.5,
+                                    maxScale: 4,
+                                    child: Image.file(
+                                      File(diary.imagePaths[index]),
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(
+                            File(diary.imagePaths[index]),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return SizedBox.shrink();
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   ),
+                  SizedBox(height: 16),
+                ],
+                // 일기 내용
+                Text(
+                  diary.content,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            // 일기 내용
-            Text(
-              _currentDiary.content,
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.8,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
