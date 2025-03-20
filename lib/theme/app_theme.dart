@@ -87,6 +87,25 @@ class AppTheme {
     ),
   );
   
+  // 바텀 네비게이션 아이콘 스타일
+  static const bottomNavIconSize = 24.0;
+  static const bottomNavSelectedIconColor = secondaryPink;
+  static const bottomNavUnselectedIconColor = Color(0xFFBDBDBD);
+  static const bottomNavLabelStyle = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+  );
+  static const bottomNavSelectedLabelStyle = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    color: lightPurple,
+  );
+  static const bottomNavUnselectedLabelStyle = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: Color(0xFFBDBDBD),
+  );
+
   // 라이트 테마 정의
   static ThemeData lightTheme = ThemeData(
     primaryColor: lightPurple,
@@ -115,7 +134,14 @@ class AppTheme {
       bodySmall: TextStyle(color: textSecondary, fontSize: 12),
     ),
     
-
+    // 바텀 네비게이션 테마
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: background,
+      selectedItemColor: bottomNavSelectedIconColor,
+      unselectedItemColor: bottomNavUnselectedIconColor,
+      selectedLabelStyle: bottomNavSelectedLabelStyle,
+      unselectedLabelStyle: bottomNavUnselectedLabelStyle,
+    ),
     
     // 기타 테마 설정
     colorScheme: ColorScheme.light(

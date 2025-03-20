@@ -3,6 +3,7 @@ import '../widgets/CustomBottomNavigationBar.dart';
 import 'main_page.dart';  // 메인 페이지
 import 'add_diary_page.dart';  // 일기 추가 페이지
 import './my_diary_page.dart';  // 마이 페이지
+import './bookshelf_page.dart';  // 책장 페이지
 
 class BottomNav extends StatefulWidget {
   const BottomNav({super.key});
@@ -15,9 +16,10 @@ class _BottomNavState extends State<BottomNav> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const MainPage(),     // 실제 메인 페이지 위젯
-    const AddDiaryPage(), // 일기 추가 페이지 위젯
-    const MyDiaryPage(),       // 마이 페이지 위젯
+    const MainPage(),      // 메인 페이지
+    const BookshelfPage(), // 책장 페이지
+    const AddDiaryPage(),  // 일기 추가 페이지
+    const MyDiaryPage(),   // 마이 페이지
   ];
 
   @override
