@@ -43,11 +43,7 @@ class AppTheme {
   
   // 캘린더 스타일
   static CalendarStyle calendarStyle = CalendarStyle(
-    markersMaxCount: 2,
-    markerDecoration: BoxDecoration(
-      color: primaryYellow,
-      shape: BoxShape.circle,
-    ),
+    markersMaxCount: 6,
     todayDecoration: BoxDecoration(
       color: Colors.transparent,
       shape: BoxShape.circle,
@@ -66,6 +62,7 @@ class AppTheme {
       color: textPrimary,
       fontWeight: FontWeight.bold,
     ),
+    outsideDaysVisible: false,
   );
   
   // 헤더 스타일

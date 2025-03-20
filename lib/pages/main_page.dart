@@ -94,6 +94,7 @@ class _MainPageState extends State<MainPage> {
                   focusedDay: _focusedDay,
                   calendarFormat: CalendarFormat.month,
                   headerStyle: AppTheme.calendarHeaderStyle,
+                  calendarStyle: AppTheme.calendarStyle,
                   selectedDayPredicate: (day) {
                     return isSameDay(_selectedDay, day);
                   },
