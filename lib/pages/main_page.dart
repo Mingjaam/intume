@@ -160,7 +160,6 @@ class _MainPageState extends State<MainPage> {
                               ? Container(
                                   width: double.infinity,
                                   padding: EdgeInsets.all(16),
-                                  decoration: AppTheme.diaryBoxDecoration,
                                   child: Text(
                                     '아직 작성된 일기가 없습니다. 새 일기를 작성해보세요!',
                                     style: Theme.of(context).textTheme.bodyMedium,

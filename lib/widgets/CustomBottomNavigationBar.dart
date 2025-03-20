@@ -32,12 +32,12 @@ class CustomBottomNavigationBar extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.add_circle_outline),
           activeIcon: Icon(Icons.add_circle),
-          label: '일기쓰기',
+          label: '템플릿',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
-          label: '마이',
+          label: '마이페이지',
         ),
       ],
     );
