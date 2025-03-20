@@ -83,7 +83,10 @@ class _MainPageState extends State<MainPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Divider(thickness: 1),
+                Divider(
+                  thickness: 1,
+                  color: AppTheme.secondaryPink,
+                ),
                 TableCalendar(
                   locale: 'ko_KR',
                   firstDay: DateTime.utc(2020, 1, 1),
@@ -130,7 +133,10 @@ class _MainPageState extends State<MainPage> {
                     },
                   ),
                 ),
-                Divider(thickness: 1),
+                Divider(
+                  thickness: 1,
+                  color: AppTheme.secondaryPink,
+                ),
                 SizedBox(height: 16),
                 _selectedDay == null
                     ? Center(
