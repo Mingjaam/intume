@@ -5,6 +5,9 @@ import 'bottom_nav.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../utils/image_helper.dart';
+import '../models/tag.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
 
 class AddDiaryPage extends StatefulWidget {
   // 수정할 일기 데이터 (새로운 일기 작성시에는 null)
@@ -21,21 +24,31 @@ class AddDiaryPage extends StatefulWidget {
 
 class _AddDiaryPageState extends State<AddDiaryPage> {
   final _contentController = TextEditingController();
-  // 태그 목록과 선택된 태그
-  final List<String> _tags = ['MY', '운동일지', '영화일지', 'instagram'];
-  String _selectedTag = 'MY';  // 기본값
+  List<Tag> _tags = [];
+  String _selectedTag = 'MY';
   List<String> _imagePaths = [];
   final _picker = ImagePicker();
+  final _tagController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // 수정 모드일 경우 기존 데이터로 초기화
+    _loadTags();
     if (widget.diary != null) {
       _contentController.text = widget.diary!.content;
       _selectedTag = widget.diary!.tag;
       _imagePaths = widget.diary!.imagePaths;
     }
+  }
+
+  Future<void> _loadTags() async {
+    final tagMaps = await DatabaseHelper.instance.getAllTags();
+    setState(() {
+      _tags = tagMaps.map((map) => Tag.fromMap(map)).toList();
+      if (_tags.isNotEmpty && _selectedTag.isEmpty) {
+        _selectedTag = _tags[0].name;
+      }
+    });
   }
 
   Future<void> _pickImage() async {
@@ -64,7 +77,7 @@ class _AddDiaryPageState extends State<AddDiaryPage> {
       final updatedDiary = Diary(
         id: widget.diary!.id,
         content: _contentController.text,
-        tag: _selectedTag,           // 선택된 태그 저장
+        tag: _selectedTag,
         createdAt: widget.diary!.createdAt,
         imagePaths: _imagePaths,
       );
@@ -78,7 +91,7 @@ class _AddDiaryPageState extends State<AddDiaryPage> {
       // 새로운 일기 작성 모드
       final diary = Diary(
         content: _contentController.text,
-        tag: _selectedTag,           // 선택된 태그 저장
+        tag: _selectedTag,
         createdAt: DateTime.now(),
         imagePaths: _imagePaths,
       );
@@ -92,6 +105,106 @@ class _AddDiaryPageState extends State<AddDiaryPage> {
         );
       }
     }
+  }
+
+  void _showAddTagDialog() {
+    Color selectedColor = Colors.amber; // 기본 색상을 Material 색상으로 변경
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder( // StatefulBuilder 추가
+        builder: (context, setState) => AlertDialog(
+          title: const Text('새 태그 추가'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _tagController,
+                decoration: const InputDecoration(
+                  labelText: '태그 이름',
+                  hintText: '새로운 태그 이름을 입력하세요',
+                  border: OutlineInputBorder(),
+                ),
+                textCapitalization: TextCapitalization.words,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  final Color? color = await showDialog<Color>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('태그 색상 선택'),
+                      content: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: selectedColor,
+                          onColorChanged: (color) {
+                            setState(() => selectedColor = color); // setState 추가
+                          },
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('취소'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, selectedColor),
+                          child: const Text('선택'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (color != null) {
+                    setState(() => selectedColor = color); // setState 추가
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedColor, // 선택된 색상 표시
+                ),
+                child: const Text('태그 색상 선택'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (_tagController.text.isNotEmpty) {
+                  // 태그 중복 확인
+                  bool exists = await DatabaseHelper.instance.isTagExists(_tagController.text);
+                  if (exists) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('이미 존재하는 태그입니다.')),
+                    );
+                    return;
+                  }
+
+                  // 새 태그 추가
+                  final newTag = Tag(
+                    name: _tagController.text,
+                    color: selectedColor.value.toRadixString(16).padLeft(8, '0'),
+                    createdAt: DateTime.now(),
+                  );
+                  await DatabaseHelper.instance.insertTag(newTag.toMap());
+                  
+                  setState(() {
+                    _tags.add(newTag);
+                    _selectedTag = newTag.name;
+                  });
+                  
+                  _tagController.clear();
+                  if (mounted) Navigator.pop(context);
+                }
+              },
+              child: Text('추가'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -113,26 +226,37 @@ class _AddDiaryPageState extends State<AddDiaryPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // 태그 선택 드롭다운
-              DropdownButtonFormField<String>(
-                value: _selectedTag,
-                decoration: const InputDecoration(
-                  labelText: '태그 선택',
-                  border: OutlineInputBorder(),
-                ),
-                items: _tags.map((String tag) {
-                  return DropdownMenuItem(
-                    value: tag,
-                    child: Text(tag),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedTag = newValue;
-                    });
-                  }
-                },
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedTag,
+                      decoration: const InputDecoration(
+                        labelText: '태그 선택',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _tags.map((Tag tag) {
+                        return DropdownMenuItem(
+                          value: tag.name,
+                          child: Text(tag.name),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _selectedTag = newValue;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.add_circle_outline),
+                    onPressed: _showAddTagDialog,
+                    tooltip: '새 태그 추가',
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               // 이미지 프리뷰
@@ -200,6 +324,7 @@ class _AddDiaryPageState extends State<AddDiaryPage> {
   @override
   void dispose() {
     _contentController.dispose();
+    _tagController.dispose();
     super.dispose();
   }
 }

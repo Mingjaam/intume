@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 
 class DatabaseHelper {
   static const _databaseName = "diary.db";
-  static const _databaseVersion = 3;
+  static const _databaseVersion = 6;
 
   static const table = 'diaries';
 
@@ -13,6 +13,11 @@ class DatabaseHelper {
   static const columnCreatedAt = 'created_at';
   static const columnImagePaths = 'image_paths';
 
+  static const tagTable = 'tags';
+  static const columnTagId = 'id';
+  static const columnTagName = 'name';
+  static const columnTagColor = 'color';
+  static const columnTagCreatedAt = 'created_at';
   // 싱글톤 패턴 구현
   DatabaseHelper._privateConstructor();
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
@@ -44,21 +49,69 @@ class DatabaseHelper {
         $columnImagePaths TEXT NOT NULL DEFAULT ''
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE $tagTable (
+        $columnTagId INTEGER PRIMARY KEY AUTOINCREMENT,
+        $columnTagName TEXT NOT NULL UNIQUE,
+        $columnTagColor TEXT NOT NULL,
+        $columnTagCreatedAt TEXT NOT NULL
+      )
+    ''');
+
+    await db.insert(tagTable, {
+      columnTagName: 'MY',
+      columnTagColor: 'FFFFD700',
+      columnTagCreatedAt: DateTime.now().toIso8601String(),
+    });
+    await db.insert(tagTable, {
+      columnTagName: '운동일지',
+      columnTagColor: 'FF1DF3EC',
+      columnTagCreatedAt: DateTime.now().toIso8601String(),
+    });
+    await db.insert(tagTable, {
+      columnTagName: '영화일지',
+      columnTagColor: 'FFF65858',
+      columnTagCreatedAt: DateTime.now().toIso8601String(),
+    });
+    await db.insert(tagTable, {
+      columnTagName: 'instagram',
+      columnTagColor: 'FFF36DF5',
+      columnTagCreatedAt: DateTime.now().toIso8601String(),
+    });
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
-      await db.execute('ALTER TABLE $table RENAME TO ${table}_old');
-      
-      await _onCreate(db, newVersion);
-      
+    if (oldVersion < 5) {
       await db.execute('''
-        INSERT INTO $table ($columnId, $columnContent, $columnTag, $columnCreatedAt, $columnImagePaths)
-        SELECT id, content, tag, created_at, ''
-        FROM ${table}_old
+        CREATE TABLE $tagTable (
+          $columnTagId INTEGER PRIMARY KEY AUTOINCREMENT,
+          $columnTagName TEXT NOT NULL UNIQUE,
+          $columnTagColor TEXT NOT NULL,
+          $columnTagCreatedAt TEXT NOT NULL
+        )
       ''');
-      
-      await db.execute('DROP TABLE ${table}_old');
+
+      await db.insert(tagTable, {
+        columnTagName: 'MY',
+        columnTagColor: 'FFFFD700',
+        columnTagCreatedAt: DateTime.now().toIso8601String(),
+      });
+      await db.insert(tagTable, {
+        columnTagName: '운동일지',
+        columnTagColor: 'FF1DF3EC',
+        columnTagCreatedAt: DateTime.now().toIso8601String(),
+      });
+      await db.insert(tagTable, {
+        columnTagName: '영화일지',
+        columnTagColor: 'FFF65858',
+        columnTagCreatedAt: DateTime.now().toIso8601String(),
+      });
+      await db.insert(tagTable, {
+        columnTagName: 'instagram',
+        columnTagColor: 'FFF36DF5',
+        columnTagCreatedAt: DateTime.now().toIso8601String(),
+      });
     }
   }
 
@@ -104,5 +157,34 @@ class DatabaseHelper {
       where: '$columnCreatedAt BETWEEN ? AND ?',
       whereArgs: [startStr, endStr],
     );
+  }
+
+  Future<List<Map<String, dynamic>>> getAllTags() async {
+    Database db = await instance.database;
+    return await db.query(tagTable, orderBy: '$columnTagCreatedAt ASC');
+  }
+
+  Future<int> insertTag(Map<String, dynamic> row) async {
+    Database db = await instance.database;
+    return await db.insert(tagTable, row);
+  }
+
+  Future<int> deleteTag(String tagName) async {
+    Database db = await instance.database;
+    return await db.delete(
+      tagTable,
+      where: '$columnTagName = ?',
+      whereArgs: [tagName],
+    );
+  }
+
+  Future<bool> isTagExists(String tagName) async {
+    Database db = await instance.database;
+    var result = await db.query(
+      tagTable,
+      where: '$columnTagName = ?',
+      whereArgs: [tagName],
+    );
+    return result.isNotEmpty;
   }
 } 

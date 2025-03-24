@@ -8,6 +8,7 @@ import '../pages/diary_detail_page.dart';
 import '../pages/add_diary_page.dart';
 import '../theme/app_theme.dart';
 import 'dart:io';
+import '../models/tag.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -21,14 +22,50 @@ class _MainPageState extends State<MainPage> {
   DateTime? _selectedDay;
   List<Diary> _selectedDiaries = [];
   Map<DateTime, List<Diary>> _diaryEvents = {};
+  List<Tag> _tags = [];
 
   @override
   void initState() {
     super.initState();
     initializeDateFormatting('ko_KR', null);
     _selectedDay = _focusedDay;
+    _loadTags();
     _loadDiaries();
     _loadSelectedDayDiaries();
+  }
+
+  Future<void> _loadTags() async {
+    final tagMaps = await DatabaseHelper.instance.getAllTags();
+    setState(() {
+      _tags = tagMaps.map((map) => Tag.fromMap(map)).toList();
+    });
+  }
+
+  Color _getTagColor(String tagName) {
+    try {
+      final tag = _tags.firstWhere(
+        (tag) => tag.name == tagName,
+        orElse: () => Tag(
+          name: tagName,
+          color: 'FF000000',
+          createdAt: DateTime.now(),
+        ),
+      );
+      
+      // 색상 문자열 검증
+      String colorStr = tag.color;
+      if (!colorStr.startsWith('0x') && !colorStr.startsWith('FF')) {
+        colorStr = 'FF$colorStr';
+      }
+      if (colorStr.startsWith('0x')) {
+        colorStr = colorStr.substring(2);
+      }
+      
+      return Color(int.parse(colorStr, radix: 16));
+    } catch (e) {
+      print('색상 변환 오류: $e, 태그명: $tagName');
+      return Colors.black; // 오류 발생 시 기본 색상
+    }
   }
 
   // 모든 일기를 불러와서 날짜별로 매핑하는 메소드
@@ -125,7 +162,7 @@ class _MainPageState extends State<MainPage> {
                               height: 8,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: AppTheme.getTagColor(diary.tag),
+                                color: _getTagColor(diary.tag),
                               ),
                             );
                           }).take(5).toList(),
@@ -187,7 +224,7 @@ class _MainPageState extends State<MainPage> {
                                         decoration: BoxDecoration(
                                           color: AppTheme.background,
                                           border: Border.all(
-                                            color: AppTheme.getTagColor(diary.tag),
+                                            color: _getTagColor(diary.tag),
                                             width: 2.0,
                                           ),
                                           borderRadius: BorderRadius.circular(0),
@@ -202,7 +239,7 @@ class _MainPageState extends State<MainPage> {
                                                 offset: Offset(0, -4),
                                                 child: Icon(
                                                   Icons.bookmark,
-                                                  color: AppTheme.getTagColor(diary.tag),
+                                                  color: _getTagColor(diary.tag),
                                                   size: 24,
                                                 ),
                                               ),
