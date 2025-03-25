@@ -3,15 +3,16 @@ import 'package:table_calendar/table_calendar.dart';
 
 class AppTheme {
   // 기본 색상 팔레트
-  static const Color primaryYellow = Color(0xFFFFD700); // 메인 노란색
-  static const Color secondaryPink = Color(0xFFF08080); // 보조 분홍색
+  static const Color primaryYellow = Color(0xFFF2c438); // 메인 노란색
+  static const Color secondaryPink = Color(0xFFf2b4a2); // 글쓰기 버튼, 하단 앱바
+  static const Color lightPink = Color(0xfff4dad9); // 디바이더, 연한분홍
   static const Color accentBlue = Color(0xFF00BFFF);    // 강조 하늘색
-  static const Color lightPurple = Color(0xFFC9C3E6); // 연한보라색
+  static const Color lightPurple = Color(0xff91aec6); // 연한보라색
   
   //태그별 색상
-  static const Color tagMy =Color(0xFFFFD700);
-  static const Color tagExercise = Color.fromARGB(255, 29, 243, 236);
-  static const Color tagMovie = Color.fromARGB(255, 246, 88, 88);
+  static const Color tagMy =Color(0xFFF2c438);
+  static const Color tagExercise = Color(0xFF74b9a4);
+  static const Color tagMovie = Color(0xFFef6956);
   static const Color tagInstagram = Color.fromARGB(255, 243, 109, 245);
 
   // 텍스트 색상
@@ -20,7 +21,7 @@ class AppTheme {
   static const Color textLight = Color(0xFF999999);     // 옅은 텍스트
   
   // 배경 색상
-  static const Color background = Colors.white;         // 기본 배경
+  static const Color background = Color(0xfffffdf8);         // 기본 배경
   static const Color backgroundLight = Color(0xFFF5F5F5); // 옅은 배경
   
   // 상태 색상

@@ -109,10 +109,6 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: Text("안녕, 민재", style: TextStyle(fontSize: 30)),
-        centerTitle: false,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -120,6 +116,7 @@ class _MainPageState extends State<MainPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text("안녕, 민재", style: TextStyle(fontSize: 25)),
                 Divider(
                   thickness: 1,
                   color: AppTheme.secondaryPink,
